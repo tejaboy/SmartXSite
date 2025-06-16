@@ -1,0 +1,21 @@
+body {
+    font-family: Arial, sans-serif;
+    width: 430px;
+    height: 280px;
+    margin: 20px auto;
+    text-align: center;
+}
+select, button {
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 16px;
+    width: 90%;
+}
+.tip-box {
+    background: #f9f9f9;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    text-align: left;
+}

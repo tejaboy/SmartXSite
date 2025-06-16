@@ -1,4 +1,4 @@
-import { prebuiltAppConfig } from "./libs/webllm.js";
+import { prebuiltAppConfig } from "./libs/webllm/webllm.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     if (!localStorage.getItem("model")) {
