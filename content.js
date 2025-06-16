@@ -111,7 +111,7 @@ async function extractTextPageByPage(viewer) {
 	while (currentScrollY !== previousScrollY) {
 		previousScrollY = currentScrollY;
 		viewer.scrollTop += viewer.clientHeight;
-		await new Promise((resolve) => setTimeout(resolve, 500));
+		await new Promise((resolve) => setTimeout(resolve, 200));
 
 		const text = extractTextFromElement(viewer);
 		allText += " " + text;
