@@ -48,7 +48,7 @@ git clone https://github.com/yourusername/smartxsite.git
 3. Open a PDF and click the extension to see it in action.
 
 ## 🔗 Chrome Web Store
-📥 Install the latest version from the Chrome Web Store.
+📥 Install the latest version from the [Chrome Web Store](https://chromewebstore.google.com/detail/smartxsite/bncgadpdfckkjmlmppinnjimdgiecipc).
 
 ## 📜 Licenses
 This project uses third-party libraries, each with its own license:
