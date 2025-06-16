@@ -8,7 +8,8 @@
   },
   "permissions": ["storage", "scripting"],
   "host_permissions": [
-    "*://xsite.singaporetech.edu.sg/*"
+    "*://xsite.singaporetech.edu.sg/*",
+    "https://generativelanguage.googleapis.com/v1beta/models/*"
   ],
   "content_scripts": [
     {

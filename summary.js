@@ -4,7 +4,7 @@ import { CreateMLCEngine } from "./libs/webllm/webllm.js";
 document.getElementById("content").style.display = "none";
 document.getElementById("mcq-btn").style.display = "none";
 
-// Declare the engine as a global constant
+// Set default model if not already set
 if (!localStorage.getItem("model")) {
 	localStorage.setItem("model", "Hermes-2-Pro-Llama-3-8B-q4f32_1-MLC");
 }
@@ -12,15 +12,15 @@ if (!localStorage.getItem("model")) {
 // Lazy-loaded engine initialization
 let enginePromise = null;
 const getEngine = () => {
-    if (!enginePromise) {
-        enginePromise = CreateMLCEngine(localStorage.getItem("model"), {
+	if (!enginePromise) {
+		enginePromise = CreateMLCEngine(localStorage.getItem("model"), {
 			initProgressCallback: (initProgress) => {
 				document.getElementById("status").innerText = initProgress.text;
 				console.log(initProgress);
 			},
 		});
-    }
-    return enginePromise;
+	}
+	return enginePromise;
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -36,49 +36,103 @@ document.addEventListener("DOMContentLoaded", () => {
 			const hash = await generateHash(data.extractedText);
 			console.log("Hash:", hash);
 
-			if (localStorage.getItem(hash)) {
+			if (localStorage.getItem(hash) && 1 == 2) {
 				console.log("Content already summarized.");	
 				document.getElementById("content").style.display = "block";
 				document.getElementById("summary").innerHTML = marked.parse(localStorage.getItem(hash));
 				document.getElementById("status").innerText = "";
 			}
 			else {
-				// Wait for the engine to be initialized
-				const engine = await getEngine();
+				// Prompt Engineering Setup
+				let promptText = `Summarize the following content in a structured format: ${data.extractedText} The summary should be concise and formatted into sections if necessary. Use markdown for formatting. Keep it 30% of the original length.`
 
+				// Show content div
 				document.getElementById("content").style.display = "block";
 
-				// Prepare the message
-				const messages = [
-					{
-						role: "user",
-						content: `Summarize the following content in a structured format: ${data.extractedText} The summary should be concise and formatted into sections if necessary. Use markdown for formatting. Keep it 30% of the original length.`,
-					},
-				];
-	
-				let fullText = "";
-	
-				try {
-					// Use streaming
-					const stream = await engine.chat.completions.create({
-						messages,
-						stream: true, // Enable streaming
-					});
-	
-					for await (const chunk of stream) {
-						const token = chunk.choices[0]?.delta?.content || ""; // Extract streamed content
-						fullText += token;
-	
-						// Update the summary progressively
-						document.getElementById("summary").innerHTML = marked.parse(fullText);
-						document.getElementById("status").innerText = "";
+				// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
+				if (!localStorage.getItem("model").includes("gemini")) {
+					// Wait for the engine to be initialized
+					const engine = await getEngine();
+
+					// Prepare the message
+					const messages = [
+						{
+							role: "user",
+							content: promptText,
+						},
+					];
+		
+					let fullText = "";
+		
+					try {
+						// Use streaming
+						const stream = await engine.chat.completions.create({
+							messages,
+							stream: true, // Enable streaming
+						});
+		
+						for await (const chunk of stream) {
+							const token = chunk.choices[0]?.delta?.content || ""; // Extract streamed content
+							fullText += token;
+		
+							// Update the summary progressively
+							document.getElementById("summary").innerHTML = marked.parse(fullText);
+							document.getElementById("status").innerText = "";
+						}
+		
+						localStorage.setItem(hash, fullText);
+					} catch (error) {
+						console.error("Streaming error:", error);
+						document.getElementById("summary").innerText = "Error generating summary.";
+						return;
 					}
-	
-					localStorage.setItem(hash, fullText);
-				} catch (error) {
-					console.error("Streaming error:", error);
-					document.getElementById("summary").innerText = "Error generating summary.";
-					return;
+				}
+				else {
+					// Handle Gemini API streaming request via HTTP
+					const GEMINI_API_KEY = localStorage.getItem('gemini_key');
+					const MODEL_ID = localStorage.getItem('model');
+
+					const body = {
+						contents: [
+							{
+								role: "user",
+								parts: [
+									{
+										text: promptText
+									},
+								],
+							},
+						],
+						generationConfig: {
+							responseMimeType: "text/plain"
+						}
+					};
+
+					document.getElementById("status").innerText = "";
+					document.getElementById("summary").innerText = "Loading summary with Gemini...";
+
+					try {
+						const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify(body)
+						});
+
+						if (!response.ok) {
+							throw new Error(`Request failed with status ${response.status}`);
+						}
+
+						const result = await response.json();
+						const fullText = result.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini.";
+
+						document.getElementById("summary").innerHTML = marked.parse(fullText);
+						localStorage.setItem(hash, fullText);
+					} catch (error) {
+						console.error("Gemini error:", error);
+						document.getElementById("summary").innerText = "Error generating Gemini summary.";
+					}
 				}
 			}
 

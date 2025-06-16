@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
         // Extract model IDs from prebuiltAppConfig
         const models = prebuiltAppConfig.model_list.map(m => m.model_id);
+        models.unshift("gemini-2.0-flash");
+        models.unshift("gemini-2.0-flash-lite");
 
         // Populate dropdown
         modelSelect.innerHTML = "";
@@ -37,6 +39,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Save model selection
     saveButton.addEventListener("click", () => {
         const selectedModel = modelSelect.value;
+        
+        if (selectedModel.includes("gemini")) {
+            let gemini_key = prompt("You have selected a Gemini model. Please enter your Gemini API key:", "")
+            localStorage.setItem("gemini_key", gemini_key);
+        }
+
         localStorage.setItem("model", selectedModel);
         confirmationText.textContent = `Saved Model: ${selectedModel}`;
     });
