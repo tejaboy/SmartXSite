@@ -1,7 +1,7 @@
 # SmartXSite – Your AI-Powered Study Buddy! 🧠📚
 
 **Making university life easier with AI!**  
-SmartXSite is a Chrome extension designed to help students, professionals, and lifelong learners digest and retain content more effectively — all *offline* and *privacy-first*.
+SmartXSite is a Chrome extension designed to empower SIT Content Portal with Generative AI.
 
 ## 🌟 What It Does
 
@@ -15,9 +15,6 @@ SmartXSite leverages on-device AI (via [WebLLM](https://github.com/mlc-ai/web-ll
 
 - 🔒 **Privacy-First Architecture**  
   All processing happens locally in your browser. Your files never leave your computer.
-
-- ⚡ **Quick and Seamless Workflow**  
-  Open a PDF → Get summarized content → Practice with MCQs — all in seconds.
 
 ## 📦 Files and Structure
 
