@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="summary.css">
+		<title>Smart Summarizer</title>
+	</head>
+	<body>
+		<div>
+			<p id="status">Loading summary ... please wait.</p>
+		</div>
+
+		<div id="content">
+			<button id="mcq-btn">📰 Sample MCQ</button>
+			<h2>Summary</h2>
+			<div id="summary">Generating summary ...</div>
+		</div>
+
+		<!-- Load local Marked.js -->
+		<script src="libs/marked/marked.min.js"></script>
+		<script type="module" src="summary.js"></script>
+	</body>
+</html>

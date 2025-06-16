@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Summarizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            width: 430px;
+            height: 280px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        select, button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            width: 90%;
+        }
+        .tip-box {
+            background: #f9f9f9;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h2>Select Model</h2>
+    <select id="modelSelect">
+        <option disabled>Loading models...</option>
+    </select>
+    <button id="saveModel">Save Selection</button>
+    <p id="confirmation"></p>
+
+    <div class="tip-box">
+        <strong>💡 Model Selection Tips:</strong>
+        <ul>
+            <li><b>Faster models (q4f16_1, q4f32_1):</b> Best for real-time summarization.</li>
+            <li><b>Higher-accuracy models (q0f16, q0f32):</b> Best for detailed summaries & MCQs.</li>
+            <li><b>Use 1B models:</b> When speed is more important than accuracy.</li>
+            <li><b>Use 3B or 8B models:</b> For better understanding & structured output.</li>
+        </ul>
+    </div>
+
+    <script type="module" src="index.js"></script>
+</body>
+</html>

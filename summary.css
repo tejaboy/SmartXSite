@@ -1,0 +1,54 @@
+body {
+    font-family: "Georgia", serif;
+    background: #f9f5ec;
+    color: #3e3d3c;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Paper Effect Container */
+#content {
+    background: #fffdf7;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    width: 600px;
+    max-width: 100%;
+}
+
+/* Summary Text */
+#summary {
+    white-space: pre-wrap;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #4b4844;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border-left: 5px solid #d1a77d;
+    margin-top: 10px;
+}
+
+/* Status Text */
+#status {
+    white-space: pre-wrap;
+    font-size: 12px;
+    font-family: "Courier New", Courier, monospace;
+    color: #6e6d6a;
+}
+
+/* Button Styling */
+#mcq-btn {
+    background: #d1a77d;
+    color: white;
+    font-size: 14px;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#mcq-btn:hover {
+    background: #bb8f5c;
+}
