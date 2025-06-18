@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			const hash = await generateHash(data.extractedText);
 			console.log("Hash:", hash);
 
-			if (localStorage.getItem(hash) && 1 == 2) {
+			if (localStorage.getItem(hash)) {
 				console.log("Content already summarized.");	
 				document.getElementById("content").style.display = "block";
 				document.getElementById("summary").innerHTML = marked.parse(localStorage.getItem(hash));
@@ -45,9 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
 			else {
 				// Prompt Engineering Setup
 				let promptText = `Summarize the following content in a structured format: ${data.extractedText} The summary should be concise and formatted into sections if necessary. Use markdown for formatting. Keep it 30% of the original length.`
-
-				// Show content div
-				document.getElementById("content").style.display = "block";
 
 				// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
 				if (!localStorage.getItem("model").includes("gemini")) {
@@ -76,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
 							fullText += token;
 		
 							// Update the summary progressively
+							document.getElementById("content").style.display = "block";
 							document.getElementById("summary").innerHTML = marked.parse(fullText);
 							document.getElementById("status").innerText = "";
 						}
@@ -109,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					};
 
 					document.getElementById("status").innerText = "";
+					document.getElementById("content").style.display = "block";
 					document.getElementById("summary").innerText = "Loading summary with Gemini...";
 
 					try {
@@ -152,7 +151,43 @@ document.addEventListener("DOMContentLoaded", () => {
 async function generateMCQ(fullText) {
 	document.getElementById("mcq-btn").disabled = true;
 	document.getElementById("mcq-btn").innerText = "Generating MCQ ...";
+	let result = null;
 
+	// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
+	let promptText = `Generate a multiple-choice question based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
+	console.log("Prompt Text:", promptText);
+	if (!localStorage.getItem("model").includes("gemini")) {
+		result = await generateMCQWebLLM(promptText);
+	} else {
+		result = await generateMCQGemini(promptText);
+	}
+
+	// Show error if result is null or empty and stop MCQ generation
+	if (result === null || result === undefined || result.trim() === "") {
+		alert("Failed to generate MCQ. Please try again.");
+		document.getElementById("mcq-btn").disabled = false;
+		document.getElementById("mcq-btn").innerText = "Generate MCQ";
+		return;
+	}
+
+	// If result generated, show MCQ
+	document.getElementById("mcq-btn").innerText = "MCQ Generated!";
+	const answer = JSON.parse(result);
+
+	// Ask question
+	const userAnswer = prompt(answer.question + "\n\nA: " + answer.optionA + "\nB: " + answer.optionB + "\nC: " + answer.optionC + "\nD: " + answer.optionD + "\n\n(Enter only A, B, C or D)");
+
+	if (userAnswer.toUpperCase() == answer.answer) {
+		alert("Correct! The correct answer is " + answer.answer + "\n\n" + answer.question + "\n\nA: " + answer.optionA + "\nB: " + answer.optionB + "\nC: " + answer.optionC + "\nD: " + answer.optionD);
+	} else {
+		alert("Incorrect! The correct answer is " + answer.answer + "\nExplanation: " + answer.explanation + "\n\n" + answer.question + "\n\nA: " + answer.optionA + "\nB: " + answer.optionB + "\nC: " + answer.optionC + "\nD: " + answer.optionD);
+	}
+
+	document.getElementById("mcq-btn").disabled = false;
+	document.getElementById("mcq-btn").innerText = "Generate MCQ";
+}
+
+async function generateMCQWebLLM(promptText) {
 	const schema = {
 		type: "object",
 		properties: {
@@ -178,13 +213,13 @@ async function generateMCQ(fullText) {
 	const response_format = {
 		type: "json_object",
 		schema: JSON.stringify(schema)
-	};  
+	};
 
 	const engine = await getEngine();
 	const messages = [
 		{
 			role: "user",
-			content: `Generate multiple-choice questions based on the following content: ${fullText}. The question should be related to the content. optionA, optionB, optionC and optionD must not be the same, and only one of them is the correct option.`,
+			content: promptText,
 		},
 	];
 
@@ -194,20 +229,90 @@ async function generateMCQ(fullText) {
 		response_format,
 	});
 
-	document.getElementById("mcq-btn").innerText = "MCQ Generated!";
-	const answer = JSON.parse(reply.choices[0].message.content);
+	return reply.choices[0].message.content;
+}
 
-	// Ask question
-	const userAnswer = prompt(answer.question + "\n\nA: " + answer.optionA + "\nB: " + answer.optionB + "\nC: " + answer.optionC + "\nD: " + answer.optionD + "\n\n(Enter only A, B, C or D)");
+async function generateMCQGemini(promptText) {
+	const GEMINI_API_KEY = localStorage.getItem('gemini_key');
+	const MODEL_ID = localStorage.getItem('model');
 
-	if (userAnswer.toUpperCase() == answer.answer) {
-		alert("Correct! The correct answer is " + answer.answer + "\n\n" + answer.question + "\n\nA: " + answer.optionA + "\nB: " + answer.optionB + "\nC: " + answer.optionC + "\nD: " + answer.optionD);
-	} else {
-		alert("Incorrect! The correct answer is " + answer.answer + "\nExplanation: " + answer.explanation + "\n\n" + answer.question + "\n\nA: " + answer.optionA + "\nB: " + answer.optionB + "\nC: " + answer.optionC + "\nD: " + answer.optionD);
+	const body = {
+		contents: [
+			{
+				role: "user",
+				parts: [
+					{
+						text: promptText
+					},
+				],
+			},
+		],
+		generationConfig: {
+			responseMimeType: "application/json",
+			"responseSchema": {
+				"type": "object",
+				"properties": {
+					"question": {
+						"type": "string"
+					},
+					"optionA": {
+						"type": "string"
+					},
+					"optionB": {
+						"type": "string"
+					},
+					"optionC": {
+						"type": "string"
+					},
+					"optionD": {
+						"type": "string"
+					},
+					"answer": {
+						"type": "string",
+						"enum": [
+							"A",
+							"B",
+							"C",
+							"D"
+						]
+					},
+					"explanation": {
+						"type": "string"
+					},
+				},
+				"required": [
+					"question",
+					"answer",
+					"optionA",
+					"optionB",
+					"optionC",
+					"optionD",
+					"explanation"
+				]
+			},
+		}
+	};
+
+	try {
+		const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(body)
+		});
+
+		if (!response.ok) {
+			throw new Error(`Request failed with status ${response.status}`);
+		}
+
+		const result = await response.json();
+		return result.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini.";
+		
+	} catch (error) {
+		console.error("Gemini error:", error);
+		return null;
 	}
-
-	document.getElementById("mcq-btn").disabled = false;
-	document.getElementById("mcq-btn").innerText = "Generate MCQ";
 }
 
 function generateHash(text) {
