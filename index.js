@@ -4,10 +4,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!localStorage.getItem("model")) {
         localStorage.setItem("model", "Hermes-2-Pro-Llama-3-8B-q4f32_1-MLC");
     }
-    
+
+    // Declare UI elements references
     const modelSelect = document.getElementById("modelSelect");
+    const geminiKeyInput = document.getElementById("geminiKeyInput");
     const saveButton = document.getElementById("saveModel");
     const confirmationText = document.getElementById("confirmation");
+
+    // Populate Gemini key input if it exists
+    if (localStorage.getItem("gemini_key") === null) {
+        geminiKeyInput.style.display = "none";
+    }
+    else {
+        geminiKeyInput.value = localStorage.getItem("gemini_key");
+    }
 
     try {
         // Extract model IDs from prebuiltAppConfig
@@ -36,13 +46,33 @@ document.addEventListener("DOMContentLoaded", async () => {
         confirmationText.textContent = "Failed to load models.";
     }
 
+    // On model selection change, show geminiKeyInput if Gemini model is selected
+    modelSelect.addEventListener("change", () => {
+        const selectedModel = modelSelect.value;
+        if (selectedModel.includes("gemini")) {
+            geminiKeyInput.style.display = "inline";
+            geminiKeyInput.value = localStorage.getItem("gemini_key") || "";
+        } else {
+            geminiKeyInput.style.display = "none";
+            geminiKeyInput.value = "";
+        }
+    });
+
     // Save model selection
     saveButton.addEventListener("click", () => {
         const selectedModel = modelSelect.value;
         
         if (selectedModel.includes("gemini")) {
-            let gemini_key = prompt("You have selected a Gemini model. Please enter your Gemini API key:", "")
+            const gemini_key = geminiKeyInput.value.trim();
+            if (gemini_key === "") {
+                confirmationText.textContent = "Gemini key cannot be empty.";
+                return;
+            }
+
             localStorage.setItem("gemini_key", gemini_key);
+        }
+        else {
+            localStorage.removeItem("gemini_key");
         }
 
         localStorage.setItem("model", selectedModel);
