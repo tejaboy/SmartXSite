@@ -154,7 +154,7 @@ async function generateMCQ(fullText) {
 	let result = null;
 
 	// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
-	let promptText = `Generate a multiple-choice question based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
+	let promptText = `Generate five multiple-choice question based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
 	console.log("Prompt Text:", promptText);
 	if (!localStorage.getItem("model").includes("gemini")) {
 		result = await generateMCQWebLLM(promptText);
@@ -170,21 +170,13 @@ async function generateMCQ(fullText) {
 		return;
 	}
 
-	// If result generated, show MCQ
-	document.getElementById("mcq-btn").innerText = "MCQ Generated!";
-	const answer = JSON.parse(result);
-
-	// Ask question
-	const userAnswer = prompt(answer.question + "\n\nA: " + answer.optionA + "\nB: " + answer.optionB + "\nC: " + answer.optionC + "\nD: " + answer.optionD + "\n\n(Enter only A, B, C or D)");
-
-	if (userAnswer.toUpperCase() == answer.answer) {
-		alert("Correct! The correct answer is " + answer.answer + "\n\n" + answer.question + "\n\nA: " + answer.optionA + "\nB: " + answer.optionB + "\nC: " + answer.optionC + "\nD: " + answer.optionD);
-	} else {
-		alert("Incorrect! The correct answer is " + answer.answer + "\nExplanation: " + answer.explanation + "\n\n" + answer.question + "\n\nA: " + answer.optionA + "\nB: " + answer.optionB + "\nC: " + answer.optionC + "\nD: " + answer.optionD);
-	}
-
+	// Save MCQ and reset UI
+	localStorage.setItem("mcq", result);
 	document.getElementById("mcq-btn").disabled = false;
 	document.getElementById("mcq-btn").innerText = "Generate MCQ";
+
+	// Popup quiz.html
+	window.open("quiz.html", "Quiz", "width=800,height=600");
 }
 
 async function generateMCQWebLLM(promptText) {
@@ -252,42 +244,38 @@ async function generateMCQGemini(promptText) {
 			"responseSchema": {
 				"type": "object",
 				"properties": {
-					"question": {
-						"type": "string"
-					},
-					"optionA": {
-						"type": "string"
-					},
-					"optionB": {
-						"type": "string"
-					},
-					"optionC": {
-						"type": "string"
-					},
-					"optionD": {
-						"type": "string"
-					},
-					"answer": {
-						"type": "string",
-						"enum": [
-							"A",
-							"B",
-							"C",
-							"D"
-						]
-					},
-					"explanation": {
-						"type": "string"
-					},
+					"questions": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+							"question": {
+								"type": "string"
+							},
+							"options": {
+								"type": "array",
+								"items": {
+								"type": "string"
+								}
+							},
+							"correctIndex": {
+								"type": "integer"
+							},
+							"explanation": {
+								"type": "string"
+							}
+							},
+							"required": [
+							"question",
+							"options",
+							"correctIndex",
+							"explanation"
+							]
+						},
+					}
 				},
 				"required": [
-					"question",
-					"answer",
-					"optionA",
-					"optionB",
-					"optionC",
-					"optionD",
-					"explanation"
+					"questions",
 				]
 			},
 		}
