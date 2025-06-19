@@ -154,7 +154,7 @@ async function generateMCQ(fullText) {
 	let result = null;
 
 	// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
-	let promptText = `Generate *exactly two* multiple-choice questions based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
+	let promptText = `Generate *exactly three* multiple-choice questions based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
 	console.log("Prompt Text:", promptText);
 	if (!localStorage.getItem("model").includes("gemini")) {
 		result = await generateMCQWebLLM(promptText);
