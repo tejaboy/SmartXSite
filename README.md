@@ -5,7 +5,7 @@ SmartXSite is a Chrome extension designed to empower SIT Content Portal with Gen
 
 ## 🌟 What It Does
 
-SmartXSite leverages on-device AI (via [WebLLM](https://github.com/mlc-ai/web-llm)) to provide:
+SmartXSite leverages AI to help you digest lecture content efficiently and securely—right from your browser.
 
 - 📖 **AI-Powered Summaries**  
   Summarizes PDF lecture notes directly in your browser. Say goodbye to information overload!
@@ -13,8 +13,13 @@ SmartXSite leverages on-device AI (via [WebLLM](https://github.com/mlc-ai/web-ll
 - 📝 **Auto-Generated MCQs**  
   Automatically generates multiple-choice questions from your PDF content to test your understanding.
 
-- 🔒 **Privacy-First Architecture**  
-  All processing happens locally in your browser. Your files never leave your computer.
+- 🔄 **Flexible AI Options**
+  Choose between:
+  * On-Device AI (via [WebLLM](https://github.com/mlc-ai/web-llm)) for fast, private, offline processing.
+  * Gemini API for cloud-based intelligence and improved model quality (note: if you're on the Gemini Free plan, your data may be used to improve Google's models—see [Gemini Terms](https://ai.google.dev/gemini-api/terms)).
+
+- 🔒 **Privacy-First by Design**  
+  Prefer full privacy? Use the on-device option—your files never leave your computer. The choice is yours.
 
 ## 📦 Files and Structure
 
@@ -27,6 +32,10 @@ SmartXSite/
 ├── index.html             # Default extension popup with user configrations
 ├── index.js               # JS logic for index.html
 ├── manifest.json          # Chrome extension manifest (MV3)
+├── quiz.css               # Stylesheet for quiz popup
+├── quiz.html              # Quiz popup HTML structure
+├── quiz.js                # Quiz popup JavaScript
+├── README.md              # This file duh!
 ├── summary.css            # Styling for summary.html
 ├── summary.html           # Interface for displaying summary
 ├── summary.js             # Logic to interact with WebLLM and render outputs
