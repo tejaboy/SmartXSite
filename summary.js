@@ -154,7 +154,7 @@ async function generateMCQ(fullText) {
 	let result = null;
 
 	// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
-	let promptText = `Generate two multiple-choice question based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
+	let promptText = `Generate *exactly two* multiple-choice questions based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
 	console.log("Prompt Text:", promptText);
 	if (!localStorage.getItem("model").includes("gemini")) {
 		result = await generateMCQWebLLM(promptText);
@@ -179,47 +179,49 @@ async function generateMCQ(fullText) {
 	window.open("quiz.html", "Quiz", "width=800,height=600");
 }
 
+const questionSchema = {
+    "type": "object",
+    "properties": {
+        "questions": {
+            "type": "array",
+            "items": {
+                "type": "object", // TODO: use maxItem and minItem when supported by Gemini and WebLLM (https://json-schema.org/understanding-json-schema/reference/array#length)
+                "properties": {
+                    "question": {
+                        "type": "string"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "correctIndex": {
+                        "type": "integer"
+                    },
+                    "explanation": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "question",
+                    "options",
+                    "correctIndex",
+                    "explanation"
+                ]
+            },
+        }
+    },
+    "required": [
+        "questions",
+    ]
+}
+
 async function generateMCQWebLLM(promptText) {
-	const schema = {
-		type: "object",
-		properties: {
-			questions: {
-				"type": "array",
-				"items": {
-					"type": "object",
-					"properties": {
-					"question": {
-						"type": "string"
-					},
-					"options": {
-						"type": "array",
-						"items": {
-							"type": "string"
-						}
-					},
-					"correctIndex": {
-						"type": "integer"
-					},
-					"explanation": {
-						"type": "string"
-					}
-					},
-					"required": [
-					"question",
-					"options",
-					"correctIndex",
-					"explanation"
-					]
-				},
-			},
-		},
-		required: ["questions"]
-	};
-	
 	// Convert JSON to string
 	const response_format = {
 		type: "json_object",
-		schema: JSON.stringify(schema)
+		schema: JSON.stringify(questionSchema)
 	};
 
 	const engine = await getEngine();
@@ -260,43 +262,7 @@ async function generateMCQGemini(promptText) {
 		],
 		generationConfig: {
 			responseMimeType: "application/json",
-			"responseSchema": {
-				"type": "object",
-				"properties": {
-					"questions": {
-						"type": "array",
-						"items": {
-							"type": "object",
-							"properties": {
-							"question": {
-								"type": "string"
-							},
-							"options": {
-								"type": "array",
-								"items": {
-								"type": "string"
-								}
-							},
-							"correctIndex": {
-								"type": "integer"
-							},
-							"explanation": {
-								"type": "string"
-							}
-							},
-							"required": [
-							"question",
-							"options",
-							"correctIndex",
-							"explanation"
-							]
-						},
-					}
-				},
-				"required": [
-					"questions",
-				]
-			},
+			"responseSchema": questionSchema,
 		}
 	};
 
