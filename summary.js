@@ -154,7 +154,7 @@ async function generateMCQ(fullText) {
 	let result = null;
 
 	// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
-	let promptText = `Generate five multiple-choice question based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
+	let promptText = `Generate two multiple-choice question based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
 	console.log("Prompt Text:", promptText);
 	if (!localStorage.getItem("model").includes("gemini")) {
 		result = await generateMCQWebLLM(promptText);
@@ -183,22 +183,37 @@ async function generateMCQWebLLM(promptText) {
 	const schema = {
 		type: "object",
 		properties: {
-			question: { type: "string" },
-			answer: {
-				anyOf: [
-				{ const: "A", type: "string" },
-				{ const: "B", type: "string" },
-				{ const: "C", type: "string" },
-				{ const: "D", type: "string" }
-				]
+			questions: {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+					"question": {
+						"type": "string"
+					},
+					"options": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"correctIndex": {
+						"type": "integer"
+					},
+					"explanation": {
+						"type": "string"
+					}
+					},
+					"required": [
+					"question",
+					"options",
+					"correctIndex",
+					"explanation"
+					]
+				},
 			},
-			optionA: { type: "string" },
-			optionB: { type: "string" },
-			optionC: { type: "string" },
-			optionD: { type: "string" },
-			explanation: { type: "string" },
 		},
-		required: ["question", "answer", "optionA", "optionB", "optionC", "optionD", "explanation"]
+		required: ["questions"]
 	};
 	
 	// Convert JSON to string
@@ -215,11 +230,15 @@ async function generateMCQWebLLM(promptText) {
 		},
 	];
 
+	console.log("Generating MCQ with WebLLM:");
+
 	const reply = await engine.chat.completions.create({
 		messages,
 		temperature: 0.7,
 		response_format,
 	});
+
+	console.log("Generated MCQ:", reply.choices[0].message.content);
 
 	return reply.choices[0].message.content;
 }
