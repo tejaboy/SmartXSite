@@ -53,6 +53,39 @@ waitForElementToExist(".d2l-page-header-side").then((elm) => {
 	firstElement.appendChild(link);
 });
 
+// enforced -> HTML
+// If URL is https://xsite.singaporetech.edu.sg/content/enforced/
+if (window.location.href.includes("/content/enforced/")) {
+	waitForElementToExist(".slide-menu-toolbar").then((toolbar) => {
+		const summariseItem = document.createElement("li");
+		summariseItem.id = "summarise";
+		summariseItem.className = "toolbar-panel-button";
+
+		const icon = document.createElement("span");
+		icon.textContent = "📓";
+		icon.style.display = "inline-block";
+		icon.style.fontSize = "32px";        // make it visually match others
+		icon.style.lineHeight = "32px";
+		icon.style.width = "32px";
+		icon.style.height = "32px";
+		icon.style.textAlign = "center";
+
+		const label = document.createElement("span");
+		label.className = "slide-menu-toolbar-label";
+		label.textContent = "Summarise";
+
+		summariseItem.appendChild(icon);
+		summariseItem.appendChild(document.createElement("br"));
+		summariseItem.appendChild(label);
+
+		summariseItem.addEventListener("click", () => {
+			summarizeHTML();
+		});
+
+		toolbar.appendChild(summariseItem);
+	});
+}
+
 // **Extract Text and Send to API**
 async function summarize() {
 	console.log("Summarization process is starting!");
@@ -81,21 +114,7 @@ async function summarize() {
 				console.log("Extracted text:", extractedText);
 				console.log("Summerizing text with AI ...");
 
-				if (chrome && chrome.storage && chrome.storage.local) {
-					chrome.storage.local.set({ extractedText: extractedText }, () => {
-						if (chrome.runtime.lastError) {
-							console.error("Storage Error:", chrome.runtime.lastError);
-						} else {
-							console.log("Extracted text stored successfully.");
-							chrome.runtime.sendMessage({ action: "open_popup" });
-
-							hideLoadingOverlay(loadingCircle);
-						}
-					});
-				} else {
-					console.error("Chrome storage is not available.");
-				}
-
+				showSummaryPopup(extractedText);
 				hideLoadingOverlay(loadingCircle);
 			} else {
 				console.log("PDF viewer element not found.");
@@ -148,6 +167,53 @@ function extractTextFromElement(element) {
 	return text;
 }
 
+function summarizeHTML() {
+	const container = document.querySelector(".slides");
+
+	if (!container) {
+		console.error("No .slides container found.");
+		return;
+	}
+
+	// Collect all section elements, including hidden ones
+	const slides = container.querySelectorAll("section");
+
+	let extractedText = "";
+
+	slides.forEach(slide => {
+		// Temporarily clone each slide to force access to innerText even if hidden
+		const clone = slide.cloneNode(true);
+
+		// Force visibility for hidden content
+		clone.hidden = false;
+		clone.style.display = "block";
+		clone.removeAttribute("aria-hidden");
+
+		// Append with some spacing between slides
+		extractedText += clone.innerText.trim() + "\n\n";
+	});
+
+	extractedText = extractedText.trim();
+	showSummaryPopup(extractedText);
+}
+
+/* Show Summary Popup */
+function showSummaryPopup(text) {
+	if (chrome && chrome.storage && chrome.storage.local) {
+		chrome.storage.local.set({ extractedText: text }, () => {
+			if (chrome.runtime.lastError) {
+				console.error("Storage Error:", chrome.runtime.lastError);
+			} else {
+				console.log("Extracted text stored successfully.");
+				chrome.runtime.sendMessage({ action: "open_popup" });
+			}
+		});
+	} else {
+		console.error("Chrome storage is not available.");
+	}
+}
+
+/* Overlay for loading indication */
 function showLoadingOverlay(overlayText) {
 	const overlay = document.createElement("div");
 	overlay.id = "summary-overlay";
