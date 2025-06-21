@@ -22,24 +22,36 @@ function waitForElementToExist(selector) {
 }
 
 // **Add Summarization Button**
+// enhancedSequenceViewer
 waitForElementToExist(".d2l-popup-printdownload").then((elm) => {
-	addButton(elm, "📓 Summarise", summarize);
-});
-
-function addButton(elm, text, onClick) {
-	const firstChild = elm.firstElementChild;
 	const button = document.createElement("d2l-button-subtle");
-	button.setAttribute("text", text);
+	button.setAttribute("text", "📓 Summarise");
 	button.setAttribute("type", "button");
 
 	button.addEventListener("click", () => {
-		console.log(`${text} button clicked!`);
 		button.blur();
-		onClick();
+		summarize();
 	});
 
-	firstChild.appendChild(button);
-}
+	elm.firstElementChild.appendChild(button);
+});
+
+// viewContent
+waitForElementToExist(".d2l-page-header-side").then((elm) => {
+	const firstElement = elm.lastElementChild;
+
+	const link = document.createElement("a");
+	link.className = "d2l-iterator-button d2l-iterator-button-notext";
+	link.setAttribute("role", "button");
+	link.href = "#";
+	link.appendChild(document.createTextNode("📓 Summarise"));
+
+	link.addEventListener("click", () => {
+		summarize();
+	});
+
+	firstElement.appendChild(link);
+});
 
 // **Extract Text and Send to API**
 async function summarize() {
