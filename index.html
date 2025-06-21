@@ -1,31 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="index.css">
-    <title>Smart Summarizer</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="index.css" />
+<title>Smart Summarizer</title>
 </head>
 <body>
+  <div class="tabs">
+    <button class="tab-button active" data-tab="modelTab">Model</button>
+    <button class="tab-button" data-tab="promptTab">Prompt Engineering</button>
+  </div>
+
+  <!-- Model Tab -->
+  <div id="modelTab" class="tab-content active">
     <h2>Select Model</h2>
     <select id="modelSelect">
-        <option disabled>Loading models...</option>
+      <option disabled>Loading models...</option>
     </select>
     <input type="password" id="geminiKeyInput" placeholder="Gemini Key" />
     <button id="saveModel">Save Selection</button>
     <p id="confirmation"></p>
 
     <div class="tip-box">
-        <strong>💡 Model Selection Tips:</strong>
-        <ul>
-            <li><b>Faster models (q4f16_1, q4f32_1):</b> Best for real-time summarization.</li>
-            <li><b>Higher-accuracy models (q0f16, q0f32):</b> Best for detailed summaries & MCQs.</li>
-            <li><b>Use 1B models:</b> When speed is more important than accuracy.</li>
-            <li><b>Use 3B or 8B models:</b> For better understanding & structured output.</li>
-            <li><b>Gemini models:</b> Require a <a href="https://aistudio.google.com/apikey" target="_blank">Gemini API key</a> for access.</li>
-        </ul>
+      <strong>💡 Model Selection Tips:</strong>
+      <ul>
+        <li><b>Faster models (q4f16_1, q4f32_1):</b> Best for real-time summarization.</li>
+        <li><b>Higher-accuracy models (q0f16, q0f32):</b> Best for detailed summaries & MCQs.</li>
+        <li><b>Use 1B models:</b> When speed is more important than accuracy.</li>
+        <li><b>Use 3B or 8B models:</b> For better understanding & structured output.</li>
+        <li><b>Gemini models:</b> Require a <a href="https://aistudio.google.com/apikey" target="_blank">Gemini API key</a> for access.</li>
+      </ul>
     </div>
+  </div>
 
-    <script type="module" src="index.js"></script>
+  <!-- Prompt Engineering Tab -->
+  <div id="promptTab" class="tab-content">
+    <h2>Prompt Engineering</h2>
+    <label for="summarizationPrompt">Summarization Prompt:</label>
+    <textarea id="summarizationPrompt" rows="4" placeholder="Enter your summarization prompt here..."></textarea>
+
+    <label for="mcqPrompt">MCQ Prompt:</label>
+    <textarea id="mcqPrompt" rows="4" placeholder="Enter your MCQ prompt here..."></textarea>
+
+    <button id="savePrompts">Save Prompts</button>
+    <p id="promptConfirmation"></p>
+  </div>
+
+  <script type="module" src="index.js"></script>
 </body>
 </html>

@@ -1,0 +1,2 @@
+export const defaultSummaryPrompt =  "Summarize the following content in a structured format: {content}. The summary should be concise and formatted into sections if necessary. Use markdown for formatting. Keep it 30% of the original length."
+export const defaultMCQPrompt = "Generate *exactly five* multiple-choice questions based on the following content: {content}. The question should be related to the content. Ask question from different sections of the content."

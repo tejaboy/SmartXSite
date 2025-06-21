@@ -167,6 +167,7 @@ function extractTextFromElement(element) {
 	return text;
 }
 
+/* Summarize HTML Slides */
 function summarizeHTML() {
 	const container = document.querySelector(".slides");
 

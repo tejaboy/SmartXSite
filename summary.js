@@ -1,4 +1,5 @@
 import { CreateMLCEngine } from "./libs/webllm/webllm.js";
+import { defaultSummaryPrompt, defaultMCQPrompt } from "./consts.js";
 
 // Hide content initially
 document.getElementById("content").style.display = "none";
@@ -44,7 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 			else {
 				// Prompt Engineering Setup
-				let promptText = `Summarize the following content in a structured format: ${data.extractedText} The summary should be concise and formatted into sections if necessary. Use markdown for formatting. Keep it 30% of the original length.`
+				let promptText = localStorage.getItem("summarization_prompt") || defaultSummaryPrompt;
+				promptText = promptText.replace("{content}", data.extractedText);
 
 				// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
 				if (!localStorage.getItem("model").includes("gemini")) {
@@ -154,7 +156,9 @@ async function generateMCQ(fullText) {
 	let result = null;
 
 	// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
-	let promptText = `Generate *exactly three* multiple-choice questions based on the following content: ${fullText}. The question should be related to the content. Ask question from different sections of the content.`;
+	let promptText = localStorage.getItem("mcq_prompt") || defaultMCQPrompt;
+	promptText = promptText.replace("{content}", fullText);
+
 	console.log("Prompt Text:", promptText);
 	if (!localStorage.getItem("model").includes("gemini")) {
 		result = await generateMCQWebLLM(promptText);
