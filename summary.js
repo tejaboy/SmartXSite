@@ -26,7 +26,7 @@ const getEngine = () => {
 
 document.addEventListener("DOMContentLoaded", () => {
     if (chrome && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(["extractedText"], async (data) => {
+        chrome.storage.local.get(["extractedText", "url"], async (data) => {
             if (chrome.runtime.lastError) {
                 console.error("Error fetching data:", chrome.runtime.lastError);
                 document.getElementById("summary").innerText = "Error loading summary.";
@@ -34,13 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-			const hash = await generateHash(data.extractedText);
-			console.log("Hash:", hash);
+			const url = "content_" + data.url;
+			console.log("URL:", data.url);
 
-			if (localStorage.getItem(hash)) {
+			if (localStorage.getItem(url)) {
 				console.log("Content already summarized.");	
 				document.getElementById("content").style.display = "block";
-				document.getElementById("summary").innerHTML = marked.parse(localStorage.getItem(hash));
+				document.getElementById("summary").innerHTML = marked.parse(JSON.parse(localStorage.getItem(url)).summary);
 				document.getElementById("status").innerText = "";
 			}
 			else {
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
 						},
 					];
 		
-					let fullText = "";
+					let summary = "";
 		
 					try {
 						// Use streaming
@@ -72,15 +72,18 @@ document.addEventListener("DOMContentLoaded", () => {
 		
 						for await (const chunk of stream) {
 							const token = chunk.choices[0]?.delta?.content || ""; // Extract streamed content
-							fullText += token;
+							summary += token;
 		
 							// Update the summary progressively
 							document.getElementById("content").style.display = "block";
-							document.getElementById("summary").innerHTML = marked.parse(fullText);
+							document.getElementById("summary").innerHTML = marked.parse(summary);
 							document.getElementById("status").innerText = "";
 						}
 		
-						localStorage.setItem(hash, fullText);
+						localStorage.setItem(url, JSON.stringify({
+							fullText: data.extractedText,
+							summary: summary
+						}));
 					} catch (error) {
 						console.error("Streaming error:", error);
 						document.getElementById("summary").innerText = "Error generating summary.";
@@ -126,10 +129,13 @@ document.addEventListener("DOMContentLoaded", () => {
 						}
 
 						const result = await response.json();
-						const fullText = result.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini.";
+						const summary = result.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini.";
 
-						document.getElementById("summary").innerHTML = marked.parse(fullText);
-						localStorage.setItem(hash, fullText);
+						document.getElementById("summary").innerHTML = marked.parse(summary);
+						localStorage.setItem(url, JSON.stringify({
+							fullText: data.extractedText,
+							summary: summary
+						}));
 					} catch (error) {
 						console.error("Gemini error:", error);
 						document.getElementById("summary").innerText = "Error generating Gemini summary.";
@@ -139,9 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			// Show the MCQ button
 			document.getElementById("mcq-btn").style.display = "block";
-
 			document.getElementById("mcq-btn").addEventListener("click", function() {
-				generateMCQ(localStorage.getItem(hash));
+				generateMCQ(localStorage.getItem(url));
 			});
         });
     } else {
@@ -290,14 +295,4 @@ async function generateMCQGemini(promptText) {
 		console.error("Gemini error:", error);
 		return null;
 	}
-}
-
-function generateHash(text) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(text);
-    return crypto.subtle.digest('SHA-256', data).then(hashBuffer => {
-        // Convert ArrayBuffer to hexadecimal string
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
-    });
 }

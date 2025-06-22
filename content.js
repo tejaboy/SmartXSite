@@ -201,7 +201,7 @@ function summarizeHTML() {
 /* Show Summary Popup */
 function showSummaryPopup(text) {
 	if (chrome && chrome.storage && chrome.storage.local) {
-		chrome.storage.local.set({ extractedText: text }, () => {
+		chrome.storage.local.set({ extractedText: text, url: window.location.href }, () => {
 			if (chrome.runtime.lastError) {
 				console.error("Storage Error:", chrome.runtime.lastError);
 			} else {
