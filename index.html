@@ -43,6 +43,12 @@
     <label for="mcqPrompt">MCQ Prompt:</label>
     <textarea id="mcqPrompt" rows="4" placeholder="Enter your MCQ prompt here..."></textarea>
 
+    <fieldset>
+      <legend><b>MCQ Source:</b></legend>
+      <label><input type="radio" name="mcqSource" value="true" id="useOriginal"> Use Original</label>
+      <label><input type="radio" name="mcqSource" value="false" id="useSummarized"> Use Summarized</label>
+    </fieldset>
+
     <button id="savePrompts">Save Prompts</button>
     <p id="promptConfirmation"></p>
   </div>

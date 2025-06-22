@@ -148,7 +148,10 @@ document.addEventListener("DOMContentLoaded", () => {
 			// Show the MCQ button
 			document.getElementById("mcq-btn").style.display = "block";
 			document.getElementById("mcq-btn").addEventListener("click", function() {
-				generateMCQ(localStorage.getItem(url));
+				const useFull = localStorage.getItem("mcq_use_full") || "false";
+				const content = useFull == "true" ? JSON.parse(localStorage.getItem(url)).fullText : JSON.parse(localStorage.getItem(url)).summary;
+				console.log("Content for MCQ:", content);
+				generateMCQ(content);
 			});
         });
     } else {
@@ -157,14 +160,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-async function generateMCQ(fullText) {
+async function generateMCQ(content) {
 	document.getElementById("mcq-btn").disabled = true;
 	document.getElementById("mcq-btn").innerText = "Generating MCQ ...";
 	let result = null;
 
 	// If the model is not Gemini, we can proceed with using webllm, else we need to handle Gemini differently
 	let promptText = localStorage.getItem("mcq_prompt") || defaultMCQPrompt;
-	promptText = promptText.replace("{content}", fullText);
+	promptText = promptText.replace("{content}", content);
 
 	console.log("Prompt Text:", promptText);
 	if (!localStorage.getItem("model").includes("gemini")) {

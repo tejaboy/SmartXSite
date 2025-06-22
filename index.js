@@ -92,6 +92,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // === Prompt Engineering Tab logic ===
     const summarizationPromptInput = document.getElementById("summarizationPrompt");
     const mcqPromptInput = document.getElementById("mcqPrompt");
+    const useOriginalRadio = document.getElementById("useOriginal");
+    const useSummarizedRadio = document.getElementById("useSummarized");
     const savePromptsBtn = document.getElementById("savePrompts");
     const promptConfirmation = document.getElementById("promptConfirmation");
 
@@ -99,14 +101,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     summarizationPromptInput.value = localStorage.getItem("summarization_prompt") || defaultSummaryPrompt;
     mcqPromptInput.value = localStorage.getItem("mcq_prompt") || defaultMCQPrompt;
 
+    const useFull = localStorage.getItem("mcq_use_full") || "false";
+    if (useFull === "true") {
+        useOriginalRadio.checked = true;
+    } else {
+        useSummarizedRadio.checked = true;
+    }
+
     savePromptsBtn.addEventListener("click", () => {
         const sumPrompt = summarizationPromptInput.value.trim();
         const mcqPrompt = mcqPromptInput.value.trim();
+        const mcqUseFull = useOriginalRadio.checked;
 
         localStorage.setItem("summarization_prompt", sumPrompt);
         localStorage.setItem("mcq_prompt", mcqPrompt);
+        localStorage.setItem("mcq_use_full", mcqUseFull);
 
-        promptConfirmation.textContent = "Prompts saved successfully!";
+        promptConfirmation.textContent = "Setting saved successfully!";
         setTimeout(() => {
             promptConfirmation.textContent = "";
         }, 3000);

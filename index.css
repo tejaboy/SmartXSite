@@ -1,7 +1,7 @@
 body {
   font-family: Arial, sans-serif;
   width: 430px;
-  height: 360px;
+  height: 600px;
   margin: 0;
   text-align: center;
 }
@@ -33,11 +33,8 @@ body {
   display: none;
   background: #fff;
   padding: 10px 20px 20px;
-  border: 1px solid #ddd;
-  border-top: none;
-  border-radius: 0 4px 4px 4px;
   text-align: left;
-  height: 280px;
+  height: auto;
   overflow-y: auto;
 }
 
@@ -92,4 +89,15 @@ label {
   margin-top: 10px;
   font-weight: bold;
   color: green;
+}
+
+fieldset {
+  margin-top: 15px;
+  border: none;
+  padding: 0;
+}
+
+fieldset label {
+  display: inline-block;
+  margin-right: 10px;
 }
