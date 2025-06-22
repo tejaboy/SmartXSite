@@ -42,6 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
 				document.getElementById("content").style.display = "block";
 				document.getElementById("summary").innerHTML = marked.parse(JSON.parse(localStorage.getItem(url)).summary);
 				document.getElementById("status").innerText = "";
+
+				// TODO: Compare hash, and if fullText is different, ask user if they want to regenerate summary
 			}
 			else {
 				// Prompt Engineering Setup
